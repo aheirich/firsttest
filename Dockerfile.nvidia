@@ -1,0 +1,7 @@
+FROM nvcr.io/nvidia/tensorflow:20.01-tf2-py3
+WORKDIR /home/MLPerf
+RUN apt-get install -y python3 python3-pip
+RUN pip3 install --upgrade pip numpy scipy tensorflow
+COPY . /home/MLPerf/
+CMD pwd
+#CMD [ "python", "/home/MLPerf/test_runner.py" ]
