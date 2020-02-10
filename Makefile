@@ -14,3 +14,5 @@ nvidia-image:
 nvidia-push:
 	sudo docker push aheirich/firsttest-nvidia:latest
 
+nvidia-pull:
+	singularity pull docker://aheirich/firsttest-nvidia:latest
