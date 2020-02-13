@@ -13,6 +13,6 @@ export MODULEPATH=/usr/share/Modules/modulefiles:/etc/modulefiles:/opt/modulefil
  
 module load cuda/10.0
 
-singularity pull docker:aheirich/firsttest-nvidia:latest
+singularity pull docker://aheirich/firsttest-nvidia:latest
 singularity images
-singularity run -u $(id -u):$(id -g) docker:aheirich/firsttest-nvidia
+singularity run -u $(id -u):$(id -g) docker://aheirich/firsttest-nvidia
