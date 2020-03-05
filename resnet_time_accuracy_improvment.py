@@ -7,6 +7,7 @@ seed(1)
 from tensorflow import set_random_seed
 set_random_seed(2)
 import numpy
+import time
 
 import tensorflow as tf
 from tensorflow.keras.applications.resnet50 import ResNet50
@@ -19,6 +20,15 @@ from tensorflow.keras.layers import Input
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.utils import plot_model
 
+preprocessingTime = 0
+
+def timedPreprocessInput(x, **kwargs):
+  t0 = time.perf_counter_ns();
+  preprocess_input(x, **kwargs)
+  t1 = time.perf_counter_ns();
+  elapsed_ns = t1 - t0
+  global preprocessingTime
+  preprocessingTime = preprocessingTime + elapsed
 
 def makeModel(weights, learningRate):
 
@@ -34,8 +44,17 @@ def makeModel(weights, learningRate):
   return model
 
 
-def fitModel(weights, train_generator, improvement, learningRate):
+def fitModel(weights, batchSize, improvement, learningRate):
   model = makeModel(weights, learningRate)
+  train_datagen=ImageDataGenerator(preprocessing_function=preprocess_input) #included in our dependencies
+
+  image_folder = '/home/aheirich/Documents/SLAC/software/MLPerf/firsttest/imagenet/'
+  train_generator=train_datagen.flow_from_directory(image_folder,
+                                                   target_size=(224,224),
+                                                   color_mode='rgb',
+                                                   batch_size=batchSize,
+                                                   class_mode='categorical',
+                                                   shuffle=True)
   loss = model.evaluate(train_generator, verbose=1)[0]
   print("initial loss", loss)
   targetLoss = loss / improvement
@@ -48,17 +67,24 @@ def fitModel(weights, train_generator, improvement, learningRate):
                      epochs=100000)
 
 
+# display device type
+from tensorflow.python.client import device_lib
+print(device_lib.list_local_devices())
 
-train_datagen=ImageDataGenerator(preprocessing_function=preprocess_input) #included in our dependencies
+# warmups
+for i in range(3):
+  fitModel(None, 32, 1000.0, 0.01)
 
-image_folder = '/home/aheirich/Documents/SLAC/software/MLPerf/firsttest/imagenet/'
-train_generator=train_datagen.flow_from_directory(image_folder,
-                                                 target_size=(224,224),
-                                                 color_mode='rgb',
-                                                 batch_size=32,
-                                                 class_mode='categorical',
-                                                 shuffle=True)
 
-fitModel(None, train_generator, 1000.0, 0.01)
-fitModel('imagenet', train_generator, 10.0, 0.0001)
+batchSizes = [ 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4196 ]
+for batchSize in batchSize:
+  preprocessingTime = 0
+  t0 = time.perf_counter_ns()
+  fitModel(None, batchSize, 1000.0, 0.01)
+  fitModel('imagenet', batchSize, 10.0, 0.0001)
+  t1 = time.perf_counter_ns()
+  elapsed_ns = t1 - t0
+  processingTime = elapsed_ns - preprocessingTime
+  print(">> RESNET50 batch size", batchSize, "elapsed ns", elapsed_ns,
+       "preprocessing", preprocessingTime, "processing", processingTime)
 
