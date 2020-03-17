@@ -1,7 +1,6 @@
 
 import sys
 from subprocess import Popen, PIPE
-from timeit import default_timer as timer
 import numpy as np
 from scipy.stats import linregress
 
@@ -33,9 +32,42 @@ def filterOutput(text):
                 index = index + 1
     return result
 
-#  load_infer
 
-startFirstttest = timer()
+#
+# test time to accuracy improvement for increasing bbatch sizes
+#
+
+print("testing time to accuracy improvement for increasing batch sizes")
+batchCurves = []
+processingCurves = []
+preprocessingCurves = []
+
+for i in range(numSamples):
+    print("batch pass", i)
+    batchCurve = []
+    processingCurve = []
+    preprocessingCurve = []
+    batchSize = 1
+    time = 0
+    while time is not None:
+        print("test batch size", batchSize)
+        stdout = runTest(["python3", "home/MLPerf/resnet_time_accuracy_improvement.py", str(batchSize)])
+        (time, preprocessingTime, processingTime) = filterOutput(stdout)
+        if time is not None:
+            batchCurve.append(time)
+            processingCurve.append(processingTime)
+            preprocessingCurve.append(preprocessingTime)
+            batchSize = batchSize * 2
+    batchCurves.append(batchCurve)
+    processingCurves.append(processingCurve)
+    preprocessingCurves.append(preprocessingCurve)
+
+print("batch curves", batchCurves)
+print("preprocessing", preprocessingCurves)
+print("processing", processingCurves)
+
+
+#  load_infer
 
 print("testing depth")
 depthCurves = []
@@ -93,9 +125,6 @@ print("")
 print("width curves", widthCurves)
 print("")
 
-endload_infer = timer()
-elapsed = endload_infer - startFirstttest
-print("Total seconds to run load_infer =", elapsed)
 
 depthMean = np.sum(depthCurves, 0) / numSamples
 widthMean = np.sum(widthCurves, 0) / numSamples

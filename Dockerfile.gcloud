@@ -1,0 +1,9 @@
+FROM nvidia/cuda:9.0-cudnn7-runtime
+WORKDIR /home/MLPerf
+RUN apt update
+#RUN apt-cache search python3.8
+#RUN apt-get install -y python3.8 python3-pip
+RUN apt-get install -y python3-pip
+RUN pip3 install --upgrade pip numpy scipy tensorflow
+COPY . /home/MLPerf/
+CMD [ "python3", "/home/MLPerf/test_runner.py" ]

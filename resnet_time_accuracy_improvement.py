@@ -71,20 +71,22 @@ def fitModel(weights, batchSize, improvement, learningRate):
 from tensorflow.python.client import device_lib
 print(device_lib.list_local_devices())
 
-# warmups
-for i in range(3):
-  fitModel(None, 32, 1000.0, 0.01)
+from sys import argv
+batchSize = int(argv[1])
+
+# warmup
+fitModel(None, batchSize, 1000.0, 0.01)
 
 
-batchSizes = [ 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4196 ]
-for batchSize in batchSize:
-  preprocessingTime = 0
-  t0 = time.perf_counter_ns()
-  fitModel(None, batchSize, 1000.0, 0.01)
-  fitModel('imagenet', batchSize, 10.0, 0.0001)
-  t1 = time.perf_counter_ns()
-  elapsed_ns = t1 - t0
-  processingTime = elapsed_ns - preprocessingTime
-  print(">> RESNET50 batch size", batchSize, "elapsed ns", elapsed_ns,
-       "preprocessing", preprocessingTime, "processing", processingTime)
+preprocessingTime = 0
+t0 = time.perf_counter_ns()
+fitModel(None, batchSize, 1000.0, 0.01)
+fitModel('imagenet', batchSize, 10.0, 0.0001)
+t1 = time.perf_counter_ns()
+elapsed_ns = t1 - t0
+processingTime = elapsed_ns - preprocessingTime
+print(">> RESNET50 batch size", batchSize, "elapsed ns", elapsed_ns,
+     "preprocessing", preprocessingTime, "processing", processingTime)
+return (elapsed_ns, preprocessingTime, processingTime)
+
 
