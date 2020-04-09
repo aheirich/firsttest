@@ -51,7 +51,7 @@ for i in range(numSamples):
     time = 0
     while time is not None:
         print("test batch size", batchSize)
-        stdout = runTest(["python3", "home/MLPerf/resnet_time_accuracy_improvement.py", str(batchSize)])
+        stdout = runTest(["python3", "resnet_time_accuracy_improvement.py", str(batchSize)])
         (time, preprocessingTime, processingTime) = filterOutput(stdout)
         if time is not None:
             batchCurve.append(time)
@@ -80,7 +80,7 @@ for i in range(numSamples):
     depthWeightAxis  = []
     while time is not None:
         print("test", numHiddenLayers, "X 8")
-        stdout = runTest(["python3", "home/MLPerf/load_infer.py", str(numHiddenLayers), "8"])
+        stdout = runTest(["python3", "/load_infer.py", str(numHiddenLayers), "8"])
         (time, numNeurons, numWeights) = filterOutput(stdout)
         if time is not None:
             depthCurve.append(time)
@@ -104,7 +104,7 @@ for i in range(numSamples):
     widthWeightAxis  = []
     while time is not None:
         print("test 1 X", width)
-        stdout = runTest(["python3", "home/MLPerf/load_infer.py", "1", str(width)])
+        stdout = runTest(["python3", "load_infer.py", "1", str(width)])
         (time, numNeurons, numWeights) = filterOutput(stdout)
         if time is not None:
             widthCurve.append(time)

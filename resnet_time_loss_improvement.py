@@ -2,10 +2,11 @@
 # resnet time-to-accuracy-improvement tests
 #
 
+import os
 from numpy.random import seed
 seed(1)
-from tensorflow import set_random_seed
-set_random_seed(2)
+import tensorflow as tf
+tf.random.set_seed(2)
 import numpy
 import time
 
@@ -48,7 +49,7 @@ def fitModel(weights, batchSize, improvement, learningRate):
   model = makeModel(weights, learningRate)
   train_datagen=ImageDataGenerator(preprocessing_function=preprocess_input) #included in our dependencies
 
-  image_folder = '/home/aheirich/Documents/SLAC/software/MLPerf/firsttest/imagenet/'
+  image_folder = "/home/alan_heirich/firsttest/imagenet"
   train_generator=train_datagen.flow_from_directory(image_folder,
                                                    target_size=(224,224),
                                                    color_mode='rgb',
@@ -74,19 +75,26 @@ print(device_lib.list_local_devices())
 from sys import argv
 batchSize = int(argv[1])
 
+#resolver = tf.distribute.cluster_resolver.TPUClusterResolver(tpu='grpc://' + os.environ['COLAB_TPU_ADDR'])
+#tf.config.experimental_connect_to_host(resolver.master())
+#tf.tpu.experimental.initialize_tpu_system(resolver)
+#strategy = tf.distribute.experimental.TPUStrategy(resolver)
+
+#with strategy.scope():
+if True:
 # warmup
-fitModel(None, batchSize, 1000.0, 0.01)
+  fitModel(None, batchSize, 1000.0, 0.01)
 
 
-preprocessingTime = 0
-t0 = time.perf_counter_ns()
-fitModel(None, batchSize, 1000.0, 0.01)
-fitModel('imagenet', batchSize, 10.0, 0.0001)
-t1 = time.perf_counter_ns()
-elapsed_ns = t1 - t0
-processingTime = elapsed_ns - preprocessingTime
-print(">> RESNET50 batch size", batchSize, "elapsed ns", elapsed_ns,
+  preprocessingTime = 0
+  t0 = time.perf_counter_ns()
+  fitModel(None, batchSize, 1000.0, 0.01)
+  fitModel('imagenet', batchSize, 10.0, 0.0001)
+  t1 = time.perf_counter_ns()
+  elapsed_ns = t1 - t0
+  processingTime = elapsed_ns - preprocessingTime
+  print(">> RESNET50 batch size", batchSize, "elapsed ns", elapsed_ns,
      "preprocessing", preprocessingTime, "processing", processingTime)
-return (elapsed_ns, preprocessingTime, processingTime)
+#  (elapsed_ns, preprocessingTime, processingTime)
 
 
