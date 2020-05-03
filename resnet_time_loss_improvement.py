@@ -9,6 +9,22 @@ import tensorflow as tf
 tf.random.set_seed(2)
 import numpy
 import time
+print("Tensorflow version " + tf.__version__)
+
+
+TPU = True
+if TPU:
+  try:
+    tpu = tf.distribute.cluster_resolver.TPUClusterResolver("tpuvm1")  # TPU detection
+    print('Running on TPU ', tpu.cluster_spec().as_dict()['worker'])
+  except ValueError:
+    raise BaseException('ERROR: Not connected to a TPU runtime; please see the previous cell in this notebook for instructions!')
+else:
+  print("gpu tbd")
+
+tf.config.experimental_connect_to_cluster(tpu)
+tf.tpu.experimental.initialize_tpu_system(tpu)
+tpu_strategy = tf.distribute.experimental.TPUStrategy(tpu)
 
 import tensorflow as tf
 from tensorflow.keras.applications.resnet50 import ResNet50
